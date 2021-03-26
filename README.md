@@ -7,7 +7,7 @@ The code present here was mainly written by myself, with the following exception
   
   (2) clr_callback.py, available at https://github.com/bckenstler/CLR.
 
-Also, the files containing the temperature measurements used in the experiment where generated from a dataset available at https://datadryad.org/stash/dataset/doi:10.6071/M39Q2V.
+Also, the files containing the temperature measurements used in the experiment were generated from a dataset available at https://datadryad.org/stash/dataset/doi:10.6071/M39Q2V.
 
 >> Obs.: Given that portuguese is my mother language, the code may contain some forgotten comments in this language that can be ignored.
 
