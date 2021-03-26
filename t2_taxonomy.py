@@ -92,13 +92,12 @@ def t2_taxonomy(lr_list=None,dir_id='tx_results_',verbose=False):
 
 	#generate datasets -- specific to my dataset
 	(train_dts,num_batches),(test_dts,num_ts_batches) = initDataset(dts_loc,
-																						cols,
-																						smp_size,
-																						test_size,
-																						wnd_stride,
-																						test_stride,
-																						wnd_str_comp=wnd_str_comp)#,
-																						#combine=combine)
+									cols,
+									smp_size,
+									test_size,
+									wnd_stride,
+									test_stride,
+									wnd_str_comp=wnd_str_comp)#,#combine=combine)
 	aug_tec = []
 	#scaling
 	if scal:
@@ -188,19 +187,15 @@ def t2_taxonomy(lr_list=None,dir_id='tx_results_',verbose=False):
 		for i in range(turns_per_config):
 			print('>>>{:03d} Turn'.format(i))
 			iteration = aeTrain(model,#layers.copy(),
-										batch_size,
-										train_dts,
-										#spec,
-										(min_lr,max_lr,ae_mode),
-										#out_act=out_func,
-										#dropout = config_dropout.copy(),
-										k=ae_clr_const,
-										patience=ae_patience,
-										saveAt=tempAE,
-										verbose=verbose,
-										wait=ae_fix,
-										optimizer=optFunc)#,
-										#addBatchNorm=addBatchNorm))
+						batch_size,
+						train_dts,
+						(min_lr,max_lr,ae_mode),
+						k=ae_clr_const,
+						patience=ae_patience,
+						saveAt=tempAE,
+						verbose=verbose,
+						wait=ae_fix,
+						optimizer=optFunc)
 
 			iteration_avg.update_state(iteration)
 			print('It took {} iterations'.format(iteration))
@@ -209,7 +204,7 @@ def t2_taxonomy(lr_list=None,dir_id='tx_results_',verbose=False):
 			os.remove(tempAE)
 
 			#test
-			cur_outputs = []				#parei aqui
+			cur_outputs = []
 			it_test_loss_avg = Mean()
 			if isinstance(test_dts,list):
 				for name,dataset in test_dts:
