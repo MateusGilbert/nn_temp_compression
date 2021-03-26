@@ -18,14 +18,12 @@ out_func = 'sigmoid'#'tanh'
 hid_act = 'selu'#'relu'
 hid_act2 = 'relu'
 enc_act = None#'c_sigmoid'
-#addBatchNorm = True if hid_act == 'relu' else False
-#addBatchNorm = (addBatchNorm,False)
-func_range = (0,1)		#(-1,1)
-perc_th = 0#5e-4 #.05% dos limites das funções de ativação
+func_range = (0,1)	#(-1,1)
+perc_th = 0
 round_range = func_range#(perc_th,func_range[1]*(1.-perc_th))
-ae_clr_const = 5			#clr stepsize constant
-ae_mode = 'exp_range' #'triangular2'
-ae_patience = 15		#for an ae_clr_const == 5, we have a cycle and a half
+ae_clr_const = 5	#clr stepsize constant
+ae_mode = 'exp_range'	#'triangular2'
+ae_patience = 15	#for an ae_clr_const == 5, we have a cycle and a half
 ae_fix = None#100
 tempAE = 'tmpAE.h5'
 bestAE = 'bestAE.h5'
