@@ -14,11 +14,11 @@ Also, the files containing the temperature measurements used in the experiment w
 # How to Use
 As discussed above, the program trains a list of autoencoder networks accordingly with a set of parameters present in t2_taxonomy.py. They are the following:
 
-![test image size](https://github.com/MateusGilbert/topicos_SD/blob/main/pics/dim_def.png)
+![test image size](https://github.com/MateusGilbert/nn_temp_compression/blob/main/pics/dim_def.png)
 
 smp_size indicates the amount of samples are taken for each compressoon, whereas cmp_size indicates the size this batch of samples will be compressed to.
 
-![test image size](https://github.com/MateusGilbert/topicos_SD/blob/main/pics/ae_spec.png)
+![test image size](https://github.com/MateusGilbert/nn_temp_compression/blob/main/pics/ae_spec.png)
 
 (1) out_func defines the activation function of the AEs output layer;
 
