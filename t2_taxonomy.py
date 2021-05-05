@@ -156,7 +156,7 @@ def t2_taxonomy(lr_list=None,dir_id='tx_results_',verbose=False):
 		if lr_list and net_id in lr_list.keys():
 			(min_lr,max_lr) = lr_list[net_id]
 		else:
-			ae = buildNN2(model)
+			ae = buildNN(model)
 			ae.compile(loss='mse', optimizer=optFunc(), metrics=['mse','mae'])
 
 			lr_finder = LRFinder(min_lr=start_lr, max_lr=end_lr)
@@ -405,10 +405,10 @@ if __name__ == '__main__':
 	for net_id,model in models:
 		print('\nNet id {}'.format(net_id))
 		try:
-			ae = buildNN2(model)
+			ae = buildNN(model)
 		except:
 			for i in range(1,len(model)+1):
-				ae = buildNN2(model[:i])
+				ae = buildNN(model[:i])
 				ae.summary()
 		ae.summary()
 		del ae
