@@ -55,10 +55,10 @@ compType = 'temporal'
 dts_name = ['YandHalfChallenge/' + name for name in ['Caples_Lake_N7_2014_20162.csv', 'Caples_Lake_N7_2016_2017.csv']] #'Caples_Lake_N7_2014_2017.csv'
 cols = [0,1]
 if isinstance(dts_name,list):
-	dts_loc = ['Datasets/' + name for name in dts_name]
+	dts_loc = ['./Datasets/' + name for name in dts_name]
 	rFolder = '{}_results'.format(dts_name[0][:-6])
 else:
-	dts_loc = 'Datasets/' + dts_name
+	dts_loc = './Datasets/' + dts_name
 	rFolder = '{}_results'.format(dts_name[:-6])
 table_name = 'table.txt'
 conf_table = '{}_helper.txt'.format(table_name[:-4])
