@@ -47,3 +47,35 @@ Each network is defined by a string, which will be used to identify its results.
 Lastly, the following parameters are needed to start the program:
 
 ![test image size](https://github.com/MateusGilbert/nn_temp_compression/blob/main/pics/gen_par.png)
+
+(1) wnd_stride defines the stride rate used in the training set to generate training batches;
+
+(2) wnd_stride_comp keep the aditional stride rates to be used in the training set, if desired (if not, should be set to None);
+
+(3) test_stride defines the stride rate to be used in the test set (if no overlap is desired, should be set to >= smp_size);
+
+(4) turns_per_config defines the number of times each neural network model will be trained (and tested);
+
+(5) batch_size defines the number of samples that will form a training batch;
+
+(6) test_size defines the percentage of samples from the desired dataset that will be spared for testing;
+
+(7) usingNest defines if the Nadam should be used in trainig (when set to false, Adam is the selected optimizer);
+
+(8) compType defines if the scenario analysed is temporal or spatial (obs.: the later has not yet been implemented);
+
+(9) dts_name defines the datasets to be used;
+
+(10) cols defines the columns to be extracted from the dataset;
+
+(11) table_name defines the file where the results will be save;
+
+(12) conf_table is the file that will list the order of the models shown by the file that keeps the results (it is an auxiliary file to the previous one);
+
+(13) filename is the readme file that is generated at the end of the program;
+
+(14) (start|end)_lr and lr_epochs are parameters needed to run LRFinder;
+
+(15) when zoom is set, generates subplots of the test results taking z_range entries;
+
+(16) variables that fall under '#Data Augmentation' set the parameters of these augmentation algorithms (to be discussed later).
