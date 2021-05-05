@@ -43,3 +43,7 @@ In the same file, the neural networks to be evaluated are kept in a list structu
 ![test image size](https://github.com/MateusGilbert/nn_temp_compression/blob/main/pics/ae_list.png)
 
 Each network is defined by a string, which will be used to identify its results. The network architecture is maintained on its own list, which will be the input variable of a program that actually constructs the neural network (to be discussed later). Both values are grouped in a pair, as can be seen in the picture. For instance, the pair ('AE-3', [('in',(smp_size,),None), ('dl',65,hid_act), ('dl',cmp_size,hid_act), ('dl',65,hid_act), ('dl',smp_size,out_func)]) represents a symmetrical autoencoder (labeled as AE-3) with a smp_size-65-cmp_size-65-smp_size architecure (if smp_size=100 and cmp_size=25, it would be 100-65-25-65-100), where all except the output layer have hid_act as its activation function. Again, more details will be discussed when the program that actually constructs the neural networks is presented.
+
+Lastly, the following parameters are needed to start the program:
+
+![test image size](https://github.com/MateusGilbert/nn_temp_compression/blob/main/pics/gen_par.png)
