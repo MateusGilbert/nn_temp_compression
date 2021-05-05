@@ -10,6 +10,7 @@ The code present here was mainly written by myself, with the following exception
 Also, the files containing the temperature measurements used in the experiment were extracted from a dataset available at https://datadryad.org/stash/dataset/doi:10.6071/M39Q2V.
 
 >> Obs.: Given that portuguese is my mother language, the code may contain some forgotten comments in this language that can be ignored.
+>> Obs2.: Documentation still in progress. The information presented below is sufficient to understand the requirements for running the program. Feel free to contact me if you have any questions about the files not discussed below.
 
 # How to Use
 As discussed above, the program trains a list of autoencoder networks accordingly with a set of parameters present in t2_taxonomy.py. They are the following:
