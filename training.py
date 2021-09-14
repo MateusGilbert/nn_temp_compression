@@ -2,7 +2,7 @@
 
 from clr_callback import CyclicLR
 from numba import njit
-from neuralNets import buildNN, buildNN2
+from neuralNets import buildNN
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.optimizers import Adam, Nadam
 from numpy import newaxis as nax
@@ -131,7 +131,7 @@ def aeTrain(layer_config,batch_size,train_dts,lr_vals,optimizer=Adam,patience=3,
 #		ae = buildNN(layers,spec,dropout=dropout.copy(),output=out_act,addBatchNorm=addBatchNorm,ae=(True,True))
 #	else:
 #		ae = buildNN(layers,spec,output=out_act,addBatchNorm=addBatchNorm,ae=(True,True))
-	ae = buildNN2(layer_config)
+	ae = buildNN(layer_config)
 	if verbose:
 		ae.summary()
 	ae.compile(loss='mse', optimizer=optimizer(), metrics=['mse','mae'])
@@ -148,7 +148,7 @@ def dnetTrain(layer_config,batch_size,train_dts,lr_vals,optimizer=Adam,patience=
 #		d_network = buildNN(layers,spec,dropout=dropout.copy(),output=out_act,addBatchNorm=addBatchNorm)
 #	else:
 #		d_network = buildNN(layers,spec,output=out_act,addBatchNorm=addBatchNorm)
-	d_network = buildNN2(layer_config)
+	d_network = buildNN(layer_config)
 	if verbose:
 		d_network.summary()
 	d_network.compile(loss='mse', optimizer=optimizer(), metrics=['mse','mae'])
