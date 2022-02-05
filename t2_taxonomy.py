@@ -269,7 +269,7 @@ def t2_taxonomy(lr_list=None,dir_id='tx_results_',verbose=False):
 								(x_vals, r_outputs, 'g-', 'random'),
 								(x_vals, w_outputs, 'r-', 'worst')]
 				title = 'AE Compression (from {:d} down to {:d})'.format(smp_size,cmp_size)
-				saveAt = '_'.joint(net_id.split('-'))
+				saveAt = '_'.join(net_id.split('-'))
 				#for layer in layers: saveAt += '-{}'.format(layer)
 				plot2D(plots,title=title,saveAt=saveAt,addLabels=True,dpi=500)
 				if turns_per_config == 1:
