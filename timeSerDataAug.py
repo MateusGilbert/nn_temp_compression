@@ -7,7 +7,6 @@ from numpy import flip
 import tensorflow as tf
 
 #sigma is a hyperparameter
-#tem que conferir se não está fazendo merda no shuffle
 
 def jittering(dataset, sigma=.5, prob=None, addProb=1.):
 	inputs = []
