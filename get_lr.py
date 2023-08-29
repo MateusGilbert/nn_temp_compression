@@ -58,6 +58,18 @@ models = [
 #                ('dl', 40, hid_act), ('dl', 55, hid_act), ('dl', 70, hid_act), ('dl', 85, hid_act), ('dl', smp_size, out_func)]),
 
     #CAAEs
+#   ('NCAAE-1.1', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                  ('rs', (cmp_size, 1), None), ('up_conv', (4, 3, 2, 4), hid_act), ('up_conv', (4, 3, 2, 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+   ('NCAAE-1.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+                  ('rs', (cmp_size, 1), None), ('d_conv', ((cmp_size,1), 4, 3, 2, 4), hid_act), ('up_conv', (4, 3, 2, 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+#   ('NCAAE-1.3', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                  ('rs', (cmp_size, 1), None), ('d_conv', ((cmp_size, 1), 4, 3, 2, 4), hid_act), ('d_conv', ((cmp_size*2, 4), 4, 3, 2, 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+#   ('NCAAE-2.1', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                  ('rs', (cmp_size, 1), None), ('d_conv', ((cmp_size, 1), 4, 3, 2, 4), hid_act), ('h_conv2', ([1, 2, 3], [4, 2, 2], 3, [16, 4, 4]), hid_act), ('up_conv', (8, 3, 2, 4), hid_act),
+#                  ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+#   ('NCAAE-2.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                  ('rs', (cmp_size, 1), None), ('d_conv', ((cmp_size, 1), 4, 3, 2, 4), hid_act), ('h_conv2', ([1, 2, 3], [4, 2, 2], 3, [16, 4, 4]), hid_act), ('d_conv', ((cmp_size*2,8), 8, 3, 2, 4), hid_act),
+#                  ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
 #    ('CAAE-1', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
 #                ('dl', 50, hid_act), ('rs', (50,1), None), ('ct', (4, 3, 2, 'same'), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
 #    ('CAAE-1.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
@@ -77,9 +89,9 @@ models = [
 #    ('CAAE-4', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
 #                ('dl', 50, hid_act),
 #                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (16, 3, 2, 'same', 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
-    ('CAAE-4', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
-                ('dl', 50, hid_act),
-                ('rs', (50,1), None), ('h_cv', ([1,2,3,4], 3, 1, 'same'), hid_act), ('ct', (16, 3, 2, 'same', 4), hid_act), ('cv', (1, 3, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+#    ('CAAE-4', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                ('dl', 50, hid_act),
+#                ('rs', (50,1), None), ('h_cv', ([1,2,3,4], 3, 1, 'same'), hid_act), ('ct', (16, 3, 2, 'same', 4), hid_act), ('cv', (1, 3, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
 ]
 # Regularizers dict######################
 reg_dict = {
@@ -144,9 +156,9 @@ setup_file = f'{dts_loc}/aae_class.txt'
 #the file above keeps of the entries in table.txt
 #filename = 'readme.txt'
 #Configuration settings for LR finder
-start_lr = 1e-5###################
+start_lr = 8e-5###################
 end_lr = 5e-2####################
-lr_epochs = 25
+lr_epochs = 20
 #for a better vizualization of the plots
 zoom = True
 z_range = 1000

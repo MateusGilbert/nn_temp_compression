@@ -12,6 +12,8 @@ from testNet import ae_test_dts#, dec_test_dts
 from my_datahanddlers import pre_process, pos_process
 from model_wrappers import my_wp
 import tensorflow as tf
+from my_layers import MY_LAYERS
+import re
 
 ###trocar a loss pela huber -- vai minimizar o efeito de outliers
 #Sample/Compression##########################
@@ -24,7 +26,7 @@ func_range = (0,1)            #talvez trocar, pq a selu não é perfeita
 perc_th = .01
 round_range = (perc_th,func_range[1]*(1.-perc_th))
 ae_clr_const = 5    #clr stepsize constant
-ae_mode = 'on_plateau'#'exp_range'    #'triangular2'
+ae_mode = 'on_plateau'    # 'on_plateau' or 'exp_range' or  'triangular2'
 ae_patience = 15    #for an ae_clr_const == 5, we have a cycle and a half
 ae_fix = None#100
 tempAE = 'tmpAE.h5'
@@ -32,49 +34,61 @@ bestAE = 'bestAE.h5'
 worstAE = 'worstAE.h5'
 randomAE = 'randomAE.h5'
 #Models to be trained####################
-models = [
+MODELS = [
     #basic AEs
-    ('AE-0', [('in', (smp_size,), None), ('dl', cmp_size, hid_act), ('dl', smp_size, out_func)]),
-    ('AE-1', [('in', (smp_size,), None), ('dl', 50, hid_act), ('dl', cmp_size, hid_act), ('dl', 50, hid_act), ('dl', smp_size, out_func)]),
-    ('AE-2', [('in', (smp_size,), None), ('dl', 75, hid_act), ('dl', 50, hid_act), ('dl', cmp_size, hid_act),
-                ('dl', 50, hid_act), ('dl', 75, hid_act), ('dl', smp_size, out_func)]),
-    ('AE-3', [('in', (smp_size,), None), ('dl', 85, hid_act), ('dl', 65, hid_act), ('dl', 45, hid_act), ('dl', cmp_size, hid_act),
-                ('dl', 45, hid_act), ('dl', 65, hid_act), ('dl', 85, hid_act), ('dl', smp_size, out_func)]),
-    ('AE-4', [('in', (smp_size,), None), ('dl', 85, hid_act), ('dl', 70, hid_act), ('dl', 55, hid_act), ('dl', 40, hid_act), ('dl', cmp_size, hid_act),
-                ('dl', 40, hid_act), ('dl', 55, hid_act), ('dl', 70, hid_act), ('dl', 85, hid_act), ('dl', smp_size, out_func)]),
+#    ('AE-0', [('in', (smp_size,), None), ('dl', cmp_size, hid_act), ('dl', smp_size, out_func)]),
+#    ('AE-1', [('in', (smp_size,), None), ('dl', 50, hid_act), ('dl', cmp_size, hid_act), ('dl', 50, hid_act), ('dl', smp_size, out_func)]),
+#    ('AE-2', [('in', (smp_size,), None), ('dl', 75, hid_act), ('dl', 50, hid_act), ('dl', cmp_size, hid_act),
+#                ('dl', 50, hid_act), ('dl', 75, hid_act), ('dl', smp_size, out_func)]),
+#    ('AE-3', [('in', (smp_size,), None), ('dl', 85, hid_act), ('dl', 65, hid_act), ('dl', 45, hid_act), ('dl', cmp_size, hid_act),
+#                ('dl', 45, hid_act), ('dl', 65, hid_act), ('dl', 85, hid_act), ('dl', smp_size, out_func)]),
+#    ('AE-4', [('in', (smp_size,), None), ('dl', 85, hid_act), ('dl', 70, hid_act), ('dl', 55, hid_act), ('dl', 40, hid_act), ('dl', cmp_size, hid_act),
+#                ('dl', 40, hid_act), ('dl', 55, hid_act), ('dl', 70, hid_act), ('dl', 85, hid_act), ('dl', smp_size, out_func)]),
 
     #AAEs
-   ('AAE-1', [('in', (smp_size,), None), ('dl', cmp_size, hid_act), ('dl', 50, hid_act), ('dl', smp_size, out_func)]),
-   ('AAE-2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
-               ('dl', 50, hid_act), ('dl', 75, hid_act), ('dl', smp_size, out_func)]),
-   ('AAE-3', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
-               ('dl', 45, hid_act), ('dl', 65, hid_act), ('dl', 85, hid_act), ('dl', smp_size, out_func)]),
-   ('AAE-4', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
-               ('dl', 40, hid_act), ('dl', 55, hid_act), ('dl', 70, hid_act), ('dl', 85, hid_act), ('dl', smp_size, out_func)]),
+#   ('AAE-1', [('in', (smp_size,), None), ('dl', cmp_size, hid_act), ('dl', 50, hid_act), ('dl', smp_size, out_func)]),
+#   ('AAE-2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#               ('dl', 50, hid_act), ('dl', 75, hid_act), ('dl', smp_size, out_func)]),
+#   ('AAE-3', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#               ('dl', 45, hid_act), ('dl', 65, hid_act), ('dl', 85, hid_act), ('dl', smp_size, out_func)]),
+#   ('AAE-4', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#               ('dl', 40, hid_act), ('dl', 55, hid_act), ('dl', 70, hid_act), ('dl', 85, hid_act), ('dl', smp_size, out_func)]),
 
    #CAAEs
-    ('CAAE-1', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
-                ('dl', 50, hid_act), ('rs', (50,1), None), ('ct', (4, 3, 2, 'same'), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
-    ('CAAE-1.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
-                ('dl', 50, hid_act), ('rs', (50,1), None), ('ct', (4, 3, 2, 'same'), hid_act), ('cv', (1, 3, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
-    ('CAAE-2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
-                ('dl', 50, hid_act),
-                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (4, 3, 2, 'same', 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
-    ('CAAE-2.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
-                ('dl', 50, hid_act),
-                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (4, 3, 2, 'same', 4), hid_act), ('cv', (1, 3, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
-    ('CAAE-3', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
-                ('dl', 50, hid_act),
-                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (4, 3, 2, 'same', 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
-    ('CAAE-3.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
-                ('dl', 50, hid_act),
-                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (4, 3, 2, 'same', 4), hid_act), ('cv', (1, 3, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
-    ('CAAE-4', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
-                ('dl', 50, hid_act),
-                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (16, 3, 2, 'same', 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
-    ('CAAE-4.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
-                ('dl', 50, hid_act),
-                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (16, 3, 2, 'same', 4), hid_act), ('cv', (1, 3, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+   ('NCAAE-1.1', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+                  ('rs', (cmp_size, 1), None), ('up_conv', (4, 3, 2, 4), hid_act), ('up_conv', (4, 3, 2, 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+   ('NCAAE-1.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+                  ('rs', (cmp_size, 1), None), ('d_conv', ((cmp_size,1), 4, 3, 2, 4), hid_act), ('up_conv', (4, 3, 2, 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+   ('NCAAE-1.3', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+                  ('rs', (cmp_size, 1), None), ('d_conv', ((cmp_size, 1), 4, 3, 2, 4), hid_act), ('d_conv', ((cmp_size*2, 4), 4, 3, 2, 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+   ('NCAAE-2.1', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+                  ('rs', (cmp_size, 1), None), ('d_conv', ((cmp_size, 1), 4, 3, 2, 4), hid_act), ('h_conv2', ([1, 2, 3], [4, 2, 2], 3, [16, 4, 4]), hid_act), ('up_conv', (8, 3, 2, 4), hid_act),
+                  ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+   ('NCAAE-2.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+                  ('rs', (cmp_size, 1), None), ('d_conv', ((cmp_size, 1), 4, 3, 2, 4), hid_act), ('h_conv2', ([1, 2, 3], [4, 2, 2], 3, [16, 4, 4]), hid_act), ('d_conv', ((cmp_size*2,8), 8, 3, 2, 4), hid_act),
+                  ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+#    ('CAAE-1', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                ('dl', 50, hid_act), ('rs', (50,1), None), ('ct', (4, 3, 2, 'same'), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+#    ('CAAE-1.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                ('dl', 50, hid_act), ('rs', (50,1), None), ('ct', (4, 3, 2, 'same'), hid_act), ('cv', (1, 3, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+#    ('CAAE-2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                ('dl', 50, hid_act),
+#                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (4, 3, 2, 'same', 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+#    ('CAAE-2.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                ('dl', 50, hid_act),
+#                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (4, 3, 2, 'same', 4), hid_act), ('cv', (1, 3, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+#    ('CAAE-3', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                ('dl', 50, hid_act),
+#                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (4, 3, 2, 'same', 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+#    ('CAAE-3.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                ('dl', 50, hid_act),
+#                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (4, 3, 2, 'same', 4), hid_act), ('cv', (1, 3, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+#    ('CAAE-4', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                ('dl', 50, hid_act),
+#                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (16, 3, 2, 'same', 4), hid_act), ('cv', (1, 1, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
+#    ('CAAE-4.2', [('in', (smp_size,), None), ('dl', cmp_size, hid_act),
+#                ('dl', 50, hid_act),
+#                ('rs', (50,1), None), ('cv', (4, 3, 1, 'same'), hid_act), ('ct', (16, 3, 2, 'same', 4), hid_act), ('cv', (1, 3, 1, 'same'), out_func), ('rs', (smp_size,), None)]),
 ]
 # Regularizers dict######################
 reg_dict = {
@@ -111,11 +125,11 @@ reg_dict = {
 }
 #General#####################################
 train_strides = [10, 17, 23]
-snrs = [45, 40, 35, 30, 25, 20, 15] #in dbs
-p_apply = 2/3
-test_strides = [10, 15]#smp_size
+#snrs = 0 #[45, 40, 35, 30, 25, 20, 15] #in dbs
+#p_apply = 2/3
+test_strides = [50, 33]#smp_size
 turns_per_config = 10
-batch_size = 20
+batch_size = 50
 split_ratio = .2
 usingNest = True
 compType = 'temporal'
@@ -147,7 +161,7 @@ scal = None#.125
 combine = None
 #############################################
 
-def t2_taxonomy(lr_list=None,dir_id='tx_results_',cols=None,verbose=False,log_file=None):
+def t2_taxonomy(models=MODELS,snrs=0,p_apply=0.,lr_list=None,dir_id='tx_results_',cols=None,verbose=False,log_file=None, gpu='/GPU:0'):
     try:
         os.makedirs(rFolder)
     except OSError as err:
@@ -272,6 +286,11 @@ def t2_taxonomy(lr_list=None,dir_id='tx_results_',cols=None,verbose=False,log_fi
 
         if lr_list and net_id in lr_list.keys():
             (min_lr,max_lr) = lr_list[net_id]
+        elif ae_mode == 'on_plateau':
+#           if snrs:
+#               min_lr,max_lr = 5e-5,1e-3
+#           else:
+            min_lr,max_lr = 5e-5,3e-3
         else:
             ae = buildNN(model)
             #ae = my_wp(model[0][1], ae)#, pre_process, pos_process)#######modificacao
@@ -310,19 +329,20 @@ def t2_taxonomy(lr_list=None,dir_id='tx_results_',cols=None,verbose=False,log_fi
                     fd.write(mstr)
             else:
                 print(mstr)
-            iterations = aeTrain(model,#layers.copy(),
-                        batch_size,
-                        train_dts,
-                        (min_lr,max_lr,ae_mode),
-                        k=ae_clr_const,
-                        patience=ae_patience,
-                        saveAt=tempAE,
-                        verbose=verbose,
-                        wait=ae_fix,
-                        optimizer=optFunc,
-                        val_size=split_ratio)
-                        #val_set=val_dts)
-#                        regs=(lays,reg))
+            with tf.device(gpu):
+                iterations = aeTrain(model,#layers.copy(),
+                            batch_size,
+                            train_dts,
+                            (min_lr,max_lr,ae_mode),
+                            k=ae_clr_const,
+                            patience=ae_patience,
+                            saveAt=tempAE,
+                            verbose=verbose,
+                            wait=ae_fix,
+                            optimizer=optFunc,
+                            val_size=split_ratio)
+                            #val_set=val_dts)
+    #                        regs=(lays,reg))
             res['its'][0] = iterations
 
             end_str = dttm.datetime.now().strftime('%H:%M:%S %m/%d')
@@ -336,7 +356,7 @@ def t2_taxonomy(lr_list=None,dir_id='tx_results_',cols=None,verbose=False,log_fi
             try:
                 ae = load_model(tempAE)
             except ValueError:
-                ae = load_model(tempAE, custom_objects={'OrthogonalRegularizer': OrthogonalRegularizer})
+                ae = load_model(tempAE, custom_objects=MY_LAYERS)#{'OrthogonalRegularizer': OrthogonalRegularizer})
             os.remove(tempAE)
 
             #test
@@ -352,20 +372,21 @@ def t2_taxonomy(lr_list=None,dir_id='tx_results_',cols=None,verbose=False,log_fi
                     header=not os.path.exists(table_name),
                     index=False, float_format='%.5E')
             del df
+            ae.save(f'model_{i+1}.h5')
 
             #update results
-            if len(best_outputs):
-                if minLoss > curTestLoss:
-                    minLoss = curTestLoss
-                    ae.save(bestAE)
-                elif maxLoss < curTestLoss:
-                    maxLoss = curTestLoss
-                    ae.save(worstAE)
-                elif not np.random.randint(0,100) % 5:            #.2 prob of selecting results
-                    ae.save(randomAE)
-            else:
-                minLoss = maxLoss = curTestLoss
-                ae.save(bestAE); cp(bestAE,worstAE); cp(bestAE,randomAE)
+#           if len(best_outputs):
+#               if minLoss > curTestLoss:
+#                   minLoss = curTestLoss
+#                   ae.save(bestAE)
+#               elif maxLoss < curTestLoss:
+#                   maxLoss = curTestLoss
+#                   ae.save(worstAE)
+#               elif not np.random.randint(0,100) % 5:            #.2 prob of selecting results
+#                   ae.save(randomAE)
+#           else:
+#               minLoss = maxLoss = curTestLoss
+#               ae.save(bestAE); cp(bestAE,worstAE); cp(bestAE,randomAE)
             del ae
 
         os.chdir('..')
@@ -380,7 +401,7 @@ if __name__ == '__main__':
         print(model)
     #    try:
         ae = buildNN(model)
-        ae = my_wp(model[0][1], ae)#, pre_process, pos_process)#######modificacao
+        #ae = my_wp(model[0][1], ae)#, pre_process, pos_process)#######modificacao
     #    except:
     #        for i in range(1,len(model)+1):
     #            ae = buildNN(model[:i])

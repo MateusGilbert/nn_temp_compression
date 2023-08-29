@@ -65,8 +65,8 @@ def training(model,batch_size,train_dts,lr_vals,optimizer=Adam,patience=3,k=4,no
     #callbacks
     if mode == 'exp_range':
         clr = CyclicLR(base_lr=base_lr,max_lr=max_lr,mode=mode,step_size=clr_step_size,gamma=.99994)
-    elif mode == 'on_plateau':#####################change
-        clr = ReduceLROnPlateau(monitor='val_mse', factor=.5, patience=patience//3, cooldown=2, min_lr=base_lr)
+    elif mode == 'on_plateau':
+        clr = ReduceLROnPlateau(monitor='val_mse', factor=.75, patience=min(patience//3,5), cooldown=2, min_lr=base_lr)
         K.set_value(model.optimizer.learning_rate, max_lr)
     else:
         clr = CyclicLR(base_lr=base_lr,max_lr=max_lr,mode=mode,step_size=clr_step_size)
@@ -99,7 +99,6 @@ def training(model,batch_size,train_dts,lr_vals,optimizer=Adam,patience=3,k=4,no
         if not wait and no_epochs < 150:
             no_epochs = 150
         earlystopping = EarlyStopping(monitor='val_mse',patience=patience)
-        #earlystopping = EarlyStopping(monitor='val_mse', patience=patience)
         if wait:
             history = model.fit(inputs,targets,
                                 batch_size=batch_size, callbacks=[clr,checkpoint],epochs=wait,
